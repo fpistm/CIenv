@@ -1,0 +1,33 @@
+# Specific
+astyle.out
+
+# Backup
+*.bak
+*.gho
+*.ori
+*.swp
+*.tmp
+
+# macOS
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Patch
+*.orig
+*.rej
+
+# Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VisualStudioCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
