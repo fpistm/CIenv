@@ -1,0 +1,13 @@
+pubsubclient https://github.com/knolleary/pubsubclient/archive/master.zip
+Firmata https://github.com/firmata/arduino/archive/master.zip
+Adafruit_Circuit_Playground
+Bridge
+Ethernet
+Keyboard
+LiquidCrystal
+Mouse
+SD
+Stepper
+Temboo
+WiFi
+TFT
