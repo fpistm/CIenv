@@ -1,0 +1,14 @@
+https://github.com/stm32duino/actions
+https://github.com/stm32duino/ArduinoModule-CMSIS
+https://github.com/stm32duino/Arduino_Core_STM32
+https://github.com/stm32duino/Arduino_Core_STM8
+https://github.com/stm32duino/Arduino_Tools
+https://github.com/stm32duino/Arduino_Tools_STM8
+https://github.com/stm32duino/arm-none-eabi-gcc
+https://github.com/stm32duino/BoardManagerFiles
+https://github.com/stm32duino/MP34DT01
+https://github.com/stm32duino/stm32duino.github.io
+https://github.com/stm32duino/stm32flash
+https://github.com/stm32duino/Teseo-LIV3F-Flash-Updater
+https://github.com/stm32duino/USBMicrophone
+https://github.com/stm32duino/wiki
