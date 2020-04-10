@@ -1,0 +1,11 @@
+pubsubclient https://github.com/knolleary/pubsubclient/archive/master.zip
+Firmata https://github.com/firmata/arduino/archive/master.zip
+Ethernet
+Keyboard
+LiquidCrystal
+Mouse
+SD
+Stepper
+WiFi
+TFT
+MicroNMEA
