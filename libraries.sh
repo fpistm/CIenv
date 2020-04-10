@@ -43,32 +43,39 @@ fi
 for git_repo in "${git_list[@]}"; do
   git_name=$(basename "$git_repo")
   git_dir=$local_lib_repo_path/$git_name
+  if [ -z "$git_dir" ]; then
+    continue
+  fi
+  if [ -d "$git_dir" ] && [ ! -d "$git_dir/.git" ]; then
+    rm -fr "$git_dir"
+  fi
   if [ -d "$git_dir/.git" ]; then
     rname=$(git -C "$git_dir" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
     if [ ! -z "$rname" ]; then
       echo "Updating remote $rname of $git_name..."
-      if output=$(git -C "$git_dir" fetch "$rname" 2>&1) && [ ! -z "$output" ]; then
-        # Fetch some commits
-        if output=$(git -C "$git_dir" status --porcelain) && [ -z "$output" ]; then
-          # Working directory clean
-          if output=$(git -C "$git_dir" log "${rname}/master..master") && [ -z "$output" ]; then
-            # No local commit
+      # Check if the repository is cleaned
+      # First is there any uncommited change(s) or untracked file(s)?
+      if output=$(git -C "$git_dir" status --porcelain) && [ -z "$output" ]; then
+        # Is there any local commit?
+        if output=$(git -C "$git_dir" log "${rname}/master..master") && [ -z "$output" ]; then
+          # Fetch repo
+          if output=$(git -C "$git_dir" fetch "$rname" 2>&1) && [ ! -z "$output" ]; then
             git -C "$git_dir" checkout -B master "${rname}/master"
+            echo "done"
           else
-            echo "Not updated --> local commit(s) not pushed"
-            echo "$output"
+            echo "Nothing to update"
           fi
         else
-          echo "Not updated --> uncommitted change(s) or untracked file(s)"
+          echo "Not updated --> local commit(s) not pushed"
           echo "$output"
         fi
-        echo "done"
       else
-        echo "Nothing to update"
+        echo "Not updated --> uncommitted change(s) or untracked file(s)"
+        echo "$output"
       fi
-      echo ""
+    else
+      echo "Not updated --> no remote"
     fi
-    cd ..
   else
     git -C "$local_lib_repo_path" clone "$git_repo"
   fi
