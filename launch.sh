@@ -20,6 +20,7 @@ BOARD_PATTERN=${BOARD_PATTERN:-""}
 SKETCH_FILEPATH=${SKETCH_FILEPATH:-""}
 SKETCH_LIST_FILEPATH=${SKETCH_LIST_FILEPATH:-""}
 SKETCH_PATTERN=${SKETCH_PATTERN:-""}
+PR_NUMBER=${PR_NUMBER:-""}
 
 # Fetch GitHub repo
 if [ ! -d "$repo_root_path" ]; then
@@ -36,10 +37,24 @@ if [ -d "$repo_path/.git" ]; then
   rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
   if [ ! -z "$rname" ]; then
     echo "Updating remote $rname of $git_name..."
-    if git -C "$repo_path" clean -fdx; then
-      if git -C "$repo_path" fetch "$rname"; then
-        if git -C "$repo_path" reset --hard "$rname/master"; then
-          git -C "$repo_path" checkout -B master "${rname}/master"
+    if git -C "$repo_path" clean -fdx > /dev/null 2>&1; then
+      # Fetch Pull Request if any
+      if [ ! -z "${PR_NUMBER}" ]; then
+        echo "Fetch Pull Request #$PR_NUMBER"
+        if git -C "$repo_path" fetch -fu "$rname" refs/pull/"${PR_NUMBER}"/head:pr/"${PR_NUMBER}" > /dev/null 2>&1; then
+          if git -C "$repo_path" checkout pr/"${PR_NUMBER}" > /dev/null 2>&1; then
+            echo "done"
+          else
+            echo "Failed to checkout pr/${PR_NUMBER}"
+            exit 7
+          fi
+        else
+          echo"Could not fetch Pull Request #$PR_NUMBER"
+          exit 8
+        fi
+      elif git -C "$repo_path" fetch "$rname" > /dev/null 2>&1; then
+        if git -C "$repo_path" reset --hard "$rname/master" > /dev/null 2>&1; then
+          git -C "$repo_path" checkout -B master "${rname}/master" > /dev/null 2>&1
           echo "done"
         else
           echo"Could not reset hard $git_name."
