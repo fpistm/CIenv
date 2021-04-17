@@ -275,6 +275,12 @@ updateSTM32Lib() {
     if [ -d "$git_dir" ] && [ ! -d "$git_dir/.git" ]; then
       rm -fr "${git_dir:?}"
     fi
+    # Check branch name master or main
+    bname=$(git -C "$git_dir" branch -r | grep -v "\->" | awk -F"/" '{print $2}')
+    if [ -z "$bname" ]; then
+      echo "Could not find branch name for $git_name"
+      continue
+    fi
     if [ -d "$git_dir/.git" ]; then
       rname=$(git -C "$git_dir" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
       if [ ! -z "$rname" ]; then
@@ -283,10 +289,10 @@ updateSTM32Lib() {
         # First is there any uncommited change(s) or untracked file(s)?
         if output=$(git -C "$git_dir" status --porcelain) && [ -z "$output" ]; then
           # Is there any local commit?
-          if output=$(git -C "$git_dir" log "${rname}/master..master") && [ -z "$output" ]; then
+          if output=$(git -C "$git_dir" log "${rname}/${bname}..${bname}") && [ -z "$output" ]; then
             # Fetch repo
             if output=$(git -C "$git_dir" fetch "$rname" 2>&1) && [ ! -z "$output" ]; then
-              git -C "$git_dir" checkout -B master "${rname}/master"
+              git -C "$git_dir" checkout -B ${bname} "${rname}/${bname}"
               echo "done"
             else
               echo "Nothing to update"
