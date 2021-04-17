@@ -57,7 +57,7 @@ if [ -d "$repo_path/.git" ]; then
           git -C "$repo_path" checkout -B master "${rname}/master" > /dev/null 2>&1
           echo "done"
         else
-          echo"Could not reset hard $git_name."
+          echo "Could not reset hard $git_name."
           exit 2
         fi
       else
