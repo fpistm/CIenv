@@ -34,7 +34,7 @@ libListFile="$script_path/librariesList.txt"
 gh_repo="https://api.github.com/users/stm32duino/repos?per_page=100"
 gh_release="https://api.github.com/repos/arduino/arduino-cli/releases/latest"
 gh_cli="https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh"
-gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json"
+gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/dev/STM32/package_stm_index.json"
 
 cli="arduino-cli"
 cli_path="$bin_path/$cli"
