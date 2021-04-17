@@ -33,48 +33,64 @@ fi
 if [ -d "$repo_path" ] && [ ! -d "$repo_path/.git" ]; then
   rm -fr "${repo_path:?}"
 fi
-if [ -d "$repo_path/.git" ]; then
-  rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
-  if [ ! -z "$rname" ]; then
-    echo "Updating remote $rname of $git_name..."
-    if git -C "$repo_path" clean -fdx > /dev/null 2>&1; then
-      # Fetch Pull Request if any
-      if [ ! -z "${PR_NUMBER}" ]; then
-        echo "Fetch Pull Request #$PR_NUMBER"
-        if git -C "$repo_path" fetch -fu "$rname" refs/pull/"${PR_NUMBER}"/head:pr/"${PR_NUMBER}" > /dev/null 2>&1; then
-          if git -C "$repo_path" checkout pr/"${PR_NUMBER}" > /dev/null 2>&1; then
-            echo "done"
-          else
-            echo "Failed to checkout pr/${PR_NUMBER}"
-            exit 7
-          fi
-        else
-          echo"Could not fetch Pull Request #$PR_NUMBER"
-          exit 8
-        fi
-      elif git -C "$repo_path" fetch "$rname" > /dev/null 2>&1; then
-        if git -C "$repo_path" reset --hard "$rname/master" > /dev/null 2>&1; then
-          git -C "$repo_path" checkout -B master "${rname}/master" > /dev/null 2>&1
-          echo "done"
-        else
-          echo "Could not reset hard $git_name."
-          exit 2
-        fi
-      else
-        echo "Could not fetch $rname."
-        exit 3
-      fi
-    else
-      echo "Could not clean $git_name."
-      exit 4
-    fi
-  fi
-else
+if [ ! -d "$repo_path/.git" ]; then
+  # Clone
+  echo "Cloning $git_name..."
   git -C "$repo_root_path" clone "$gh_url"
   status=$?
   if [ "$status" -ne 0 ]; then
     echo "Could not clone $gh_url."
     exit $status
+  fi
+else
+  # Update and clean
+  rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
+  if [ ! -z "$rname" ]; then
+    echo "Updating remote $rname of $git_name..."
+    # Clean up repo
+    echo "Clean up $repo_path"
+    if git -C "$repo_path" clean -fdx > /dev/null 2>&1; then
+      if git -C "$repo_path" fetch "$rname" > /dev/null 2>&1; then
+        if git -C "$repo_path" reset --hard "$rname/master" > /dev/null 2>&1; then
+          if git -C "$repo_path" checkout -B master "${rname}/master" > /dev/null 2>&1; then
+            # Delete all local branch if any
+            nb_local=$(git -C "$repo_path" branch -l | wc -l)
+            if [ $nb_local -gt 1 ]; then
+              git -C "$repo_path" branch -l | grep -v "master" | xargs git -C "$repo_path" branch -D
+            fi
+            echo "done"
+          else
+            echo "Failed to checkout master $git_name"
+            exit 4
+          fi
+        else
+          echo "Could not reset hard $git_name."
+          exit 3
+        fi
+      else
+        echo "Could not fetch $rname."
+        exit 2
+      fi
+    else
+      echo "Could not clean $git_name."
+      exit 1
+    fi
+  fi
+fi
+# Fetch Pull Request if any
+if [ ! -z "${PR_NUMBER}" ]; then
+  rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
+  echo "Fetch Pull Request #$PR_NUMBER"
+  if git -C "$repo_path" fetch -fu "$rname" refs/pull/"${PR_NUMBER}"/head:pr/"${PR_NUMBER}" > /dev/null 2>&1; then
+    if git -C "$repo_path" checkout pr/"${PR_NUMBER}" > /dev/null 2>&1; then
+      echo "done"
+    else
+      echo "Failed to checkout pr/${PR_NUMBER}"
+      exit 7
+    fi
+  else
+    echo"Could not fetch Pull Request #$PR_NUMBER"
+    exit 8
   fi
 fi
 
