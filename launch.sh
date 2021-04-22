@@ -8,7 +8,7 @@ git_name=$(basename "$gh_url")
 repo_root_path="$HOME/repo"
 repo_name=${git_name%.git}
 repo_path="$repo_root_path/$repo_name"
-cli_core_path="$HOME/.arduino15/packages/STM32/hardware/stm32"
+cli_core_path="$HOME/.arduino15/packages/STMicroelectronics/hardware/stm32"
 core_build_path="$repo_path/CI/build"
 json_path="$core_build_path/path_config.json"
 builder_name="arduino-cli.py"
@@ -77,6 +77,7 @@ else
     fi
   fi
 fi
+
 # Fetch Pull Request if any
 if [ ! -z "${PR_NUMBER}" ]; then
   rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
@@ -95,11 +96,11 @@ if [ ! -z "${PR_NUMBER}" ]; then
 fi
 
 # Link the repo to the arduino-cli
-if ! arduino-cli core list | grep "STM32" > /dev/null 2>&1; then
+if ! arduino-cli core list | grep "STMicroelectronics" > /dev/null 2>&1; then
   echo "STM32 core is not installed."
   exit 5
 fi
-core_version=$(arduino-cli core list | grep "STM32" | cut -d ' ' -f2)
+core_version=$(arduino-cli core list | grep "STMicroelectronics" | cut -d ' ' -f2)
 if [ -z "$core_version" ]; then
   echo "Undefined STM32 core version."
   exit 6

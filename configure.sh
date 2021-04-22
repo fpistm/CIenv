@@ -34,7 +34,7 @@ libListFile="$script_path/librariesList.txt"
 gh_repo="https://api.github.com/users/stm32duino/repos?per_page=100"
 gh_release="https://api.github.com/repos/arduino/arduino-cli/releases/latest"
 gh_cli="https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh"
-gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/dev/STM32/package_stm_index.json"
+gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/dev/package_stmicroelectronics_index.json"
 
 cli="arduino-cli"
 cli_path="$bin_path/$cli"
@@ -233,8 +233,8 @@ installLib() {
 updateCore() {
   echo "Install/update the STM32 core.."
   arduino-cli core update-index
-  if ! arduino-cli core list | grep "STM32" > /dev/null 2>&1; then
-    arduino-cli core install STM32:stm32
+  if ! arduino-cli core list | grep "stm32" > /dev/null 2>&1; then
+    arduino-cli core install STMicroelectronics:stm32
   else
     arduino-cli core upgrade
   fi
@@ -250,7 +250,7 @@ updateSTM32Lib() {
   fi
   ret="${PIPESTATUS[0]}"
   if [ "$ret" -ne 0 ]; then
-    echo "[$0] Could not retrieve STM32 repository list. Abort."
+    echo "[$0] Could not retrieve STM32duino repository list. Abort."
     exit "$ret"
   fi
   readarray -t git_list < "$repoListFile"
