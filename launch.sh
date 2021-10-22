@@ -51,16 +51,16 @@ else
     echo "Clean up $repo_path"
     if git -C "$repo_path" clean -fdx > /dev/null 2>&1; then
       if git -C "$repo_path" fetch "$rname" > /dev/null 2>&1; then
-        if git -C "$repo_path" reset --hard "$rname/master" > /dev/null 2>&1; then
-          if git -C "$repo_path" checkout -B master "${rname}/master" > /dev/null 2>&1; then
+        if git -C "$repo_path" reset --hard "$rname/main" > /dev/null 2>&1; then
+          if git -C "$repo_path" checkout -B main "${rname}/main" > /dev/null 2>&1; then
             # Delete all local branch if any
             nb_local=$(git -C "$repo_path" branch -l | wc -l)
             if [ "$nb_local" -gt 1 ]; then
-              git -C "$repo_path" branch -l | grep -v "master" | xargs git -C "$repo_path" branch -D
+              git -C "$repo_path" branch -l | grep -v "main" | xargs git -C "$repo_path" branch -D
             fi
             echo "done"
           else
-            echo "Failed to checkout master $git_name"
+            echo "Failed to checkout main $git_name"
             exit 4
           fi
         else
