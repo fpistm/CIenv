@@ -31,13 +31,15 @@ excludeListFile="$script_path/excludeList.txt"
 repoListFile="$script_path/listOfRepo.txt"
 libListFile="$script_path/librariesList.txt"
 
-gh_repo="https://api.github.com/users/stm32duino/repos?per_page=100"
-gh_release="https://api.github.com/repos/arduino/arduino-cli/releases/latest"
-gh_cli="https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh"
-gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/dev/package_stmicroelectronics_index.json"
+gh_owner="stm32duino"
+gh_stm32_json="https://github.com/stm32duino/BoardManagerFiles/raw/dev/package_stmicroelectronics_index.json"
 
-cli="arduino-cli"
-cli_path="$bin_path/$cli"
+gh_arduino_cli_release="https://api.github.com/repos/arduino/arduino-cli/releases/latest"
+gh_arduino_cli="https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh"
+arduino_cli="arduino-cli"
+arduino_cli_path="$bin_path/$arduino_cli"
+
+gh_cli="gh"
 
 IDE_version="1.8.16"
 IDE_name="arduino-$IDE_version"
@@ -75,40 +77,40 @@ usage() {
 }
 
 installCli() {
-  echo "Install/update arduino-cli..."
+  echo "Install/update $arduino_cli..."
   if [ ! -d "$bin_path" ]; then
     mkdir -p "$bin_path"
-  elif [ -f "$cli_path" ]; then
+  elif [ -f "$arduino_cli_path" ]; then
     # Check the installed version
-    current_version=$(arduino-cli version | cut -d ' ' -f3)
-    latest_version=$(curl -s "$gh_release" | jq -r .tag_name)
+    current_version=$($arduino_cli version | cut -d ' ' -f3)
+    latest_version=$(curl -s "$gh_arduino_cli_release" | jq -r .tag_name)
     if [ "$latest_version" != "null" ] && [ "$current_version" == "$latest_version" ]; then
-      echo "arduino-cli already up to date"
+      echo "$arduino_cli already up to date"
       echo "done"
       return
     fi
-    rm "$cli_path"
+    rm "$arduino_cli_path"
   fi
-  curl -fsSL "$gh_cli" | BINDIR="$bin_path" sh
+  curl -fsSL "$gh_arduino_cli" | BINDIR="$bin_path" sh
   ret="${PIPESTATUS[0]}"
   if [ "$ret" -ne 0 ]; then
-    echo "[$me] Could not retrieve arduino-cli. Abort."
+    echo "[$me] Could not retrieve $arduino_cli. Abort."
     exit "$ret"
   fi
-  if ! command -v $cli >/dev/null 2>&1; then
-    echo "[$me] $cli not found."
+  if ! command -v $arduino_cli >/dev/null 2>&1; then
+    echo "[$me] $arduino_cli not found."
     echo "Please ensure that $bin_path is in your PATH environment:"
     echo "Aborting!"
     exit 1
   fi
   # Reference the STM32 core
-  if ! arduino-cli config init --additional-urls "$gh_stm32" >/dev/null 2>&1; then
-    if ! arduino-cli config dump | grep "$gh_stm32" >/dev/null 2>&1; then
-      arduino-cli config add board_manager.additional_urls "$gh_stm32"
+  if ! $arduino_cli config init --additional-urls "$gh_stm32_json" >/dev/null 2>&1; then
+    if ! $arduino_cli config dump | grep "$gh_stm32_json" >/dev/null 2>&1; then
+      $arduino_cli config add board_manager.additional_urls "$gh_stm32_json"
     fi
   fi
 
-  arduino-cli core update-index
+  $arduino_cli core update-index
   echo "done"
 }
 
@@ -190,7 +192,7 @@ installLib() {
   else
     echo "Number of libraries found: ${#lib_list[@]}"
   fi
-  arduino-cli lib update-index
+  $arduino_cli lib update-index
 
   for lib_name in "${lib_list[@]}"; do
     if [[ "$lib_name" == *"http"* ]]; then
@@ -226,9 +228,9 @@ installLib() {
     else
       echo "lib name is $lib_name"
       if [ -d "${arduino_lib_path:?}/${lib_name:?}" ]; then
-        arduino-cli lib upgrade "$lib_name"
+        $arduino_cli lib upgrade "$lib_name"
       else
-        arduino-cli lib install "$lib_name"
+        $arduino_cli lib install "$lib_name"
       fi
     fi
   done
@@ -237,11 +239,11 @@ installLib() {
 
 updateCore() {
   echo "Install/update the STM32 core.."
-  arduino-cli core update-index
-  if ! arduino-cli core list | grep "stm32" >/dev/null 2>&1; then
-    arduino-cli core install STMicroelectronics:stm32
+  $arduino_cli core update-index
+  if ! $arduino_cli core list | grep "stm32" >/dev/null 2>&1; then
+    $arduino_cli core install STMicroelectronics:stm32
   else
-    arduino-cli core upgrade
+    $arduino_cli core upgrade STMicroelectronics:stm32
   fi
   echo "done"
 }
@@ -249,9 +251,9 @@ updateCore() {
 updateSTM32Lib() {
   # Get list of repo
   if [ ! -f "$excludeListFile" ]; then
-    curl -s "$gh_repo" | jq '.[]|.html_url' | sed -e "s/\"//g" >"$repoListFile"
+    $gh_cli repo list "$gh_owner" -L 200 --no-archived --json url | jq '.[]|.url' | sed -e "s/\"//g" >"$repoListFile"
   else
-    curl -s "$gh_repo" | jq '.[]|.html_url' | grep -v -f "$excludeListFile" | sed -e "s/\"//g" >"$repoListFile"
+    $gh_cli repo list "$gh_owner" -L 200 --no-archived --json url | jq '.[]|.url' | grep -v -f "$excludeListFile" | sed -e "s/\"//g" >"$repoListFile"
   fi
   ret="${PIPESTATUS[0]}"
   if [ "$ret" -ne 0 ]; then
