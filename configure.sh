@@ -146,7 +146,7 @@ installIDE() {
   if [ ! -d "$sketchbook_path" ]; then
     mkdir -p "$sketchbook_path"
   fi
-  examples_list=($(find "$IDE_example_path" -maxdepth 1 ! -path "$IDE_example_path" -type d | sort))
+  mapfile -t examples_list < <(find "$IDE_example_path" -maxdepth 1 ! -path "$IDE_example_path" -type d | sort)
 
   for example_path in "${examples_list[@]}"; do
     ln_name=$(basename "$example_path")
@@ -292,7 +292,7 @@ updateSTM32Lib() {
           if output=$(git -C "$git_dir" log "${rname}/${bname}..${bname}") && [ -z "$output" ]; then
             # Fetch repo
             if output=$(git -C "$git_dir" fetch "$rname" 2>&1) && [ ! -z "$output" ]; then
-              git -C "$git_dir" checkout -B ${bname} "${rname}/${bname}"
+              git -C "$git_dir" checkout -B "${bname}" "${rname}/${bname}"
               echo "done"
             else
               echo "Nothing to update"
