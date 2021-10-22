@@ -320,13 +320,18 @@ updateSTM32Lib() {
     fi
 
     # Handle link in Arduino libraries path
-    ln_name=$(grep "name=" "$git_dir/library.properties" | tr -d '\r' | sed -e "s/name=//g" -e "s/ /_/g")
-    if [ -L "$arduino_lib_path/$ln_name" ]; then
-      rm "$arduino_lib_path/$ln_name"
-    elif [ -e "$arduino_lib_path/$ln_name" ]; then
-      rm -fr "${arduino_lib_path:?}/${ln_name:?}"
+    if [ -f "$git_dir/library.properties" ]; then
+      ln_name=$(grep "name=" "$git_dir/library.properties" | tr -d '\r' | sed -e "s/name=//g" -e "s/ /_/g")
+      if [ -L "$arduino_lib_path/$ln_name" ]; then
+        rm "$arduino_lib_path/$ln_name"
+      elif [ -e "$arduino_lib_path/$ln_name" ]; then
+        rm -fr "${arduino_lib_path:?}/${ln_name:?}"
+      fi
+      ln -s "$git_dir" "$arduino_lib_path/$ln_name"
+    else
+      echo "$git_dir is not a library, add it to $excludeListFile"
     fi
-    ln -s "$git_dir" "$arduino_lib_path/$ln_name"
+
   done
 }
 
