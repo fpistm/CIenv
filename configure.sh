@@ -102,7 +102,12 @@ installCli() {
     exit 1
   fi
   # Reference the STM32 core
-  arduino-cli config init --additional-urls "$gh_stm32"
+  if ! arduino-cli config init --additional-urls "$gh_stm32" >/dev/null 2>&1; then
+    if ! arduino-cli config dump | grep "$gh_stm32" >/dev/null 2>&1; then
+      arduino-cli config add board_manager.additional_urls "$gh_stm32"
+    fi
+  fi
+
   arduino-cli core update-index
   echo "done"
 }
