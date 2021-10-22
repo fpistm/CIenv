@@ -49,10 +49,10 @@ else
     echo "Updating remote $rname of $git_name..."
     # Clean up repo
     echo "Clean up $repo_path"
-    if git -C "$repo_path" clean -fdx > /dev/null 2>&1; then
-      if git -C "$repo_path" fetch "$rname" > /dev/null 2>&1; then
-        if git -C "$repo_path" reset --hard "$rname/main" > /dev/null 2>&1; then
-          if git -C "$repo_path" checkout -B main "${rname}/main" > /dev/null 2>&1; then
+    if git -C "$repo_path" clean -fdx >/dev/null 2>&1; then
+      if git -C "$repo_path" fetch "$rname" >/dev/null 2>&1; then
+        if git -C "$repo_path" reset --hard "$rname/main" >/dev/null 2>&1; then
+          if git -C "$repo_path" checkout -B main "${rname}/main" >/dev/null 2>&1; then
             # Delete all local branch if any
             nb_local=$(git -C "$repo_path" branch -l | wc -l)
             if [ "$nb_local" -gt 1 ]; then
@@ -82,8 +82,8 @@ fi
 if [ ! -z "${PR_NUMBER}" ]; then
   rname=$(git -C "$repo_path" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
   echo "Fetch Pull Request #$PR_NUMBER"
-  if git -C "$repo_path" fetch -fu "$rname" refs/pull/"${PR_NUMBER}"/head:pr/"${PR_NUMBER}" > /dev/null 2>&1; then
-    if git -C "$repo_path" checkout pr/"${PR_NUMBER}" > /dev/null 2>&1; then
+  if git -C "$repo_path" fetch -fu "$rname" refs/pull/"${PR_NUMBER}"/head:pr/"${PR_NUMBER}" >/dev/null 2>&1; then
+    if git -C "$repo_path" checkout pr/"${PR_NUMBER}" >/dev/null 2>&1; then
       echo "done"
     else
       echo "Failed to checkout pr/${PR_NUMBER}"
@@ -96,7 +96,7 @@ if [ ! -z "${PR_NUMBER}" ]; then
 fi
 
 # Link the repo to the arduino-cli
-if ! arduino-cli core list | grep "STMicroelectronics" > /dev/null 2>&1; then
+if ! arduino-cli core list | grep "STMicroelectronics" >/dev/null 2>&1; then
   echo "STM32 core is not installed."
   exit 5
 fi
@@ -116,7 +116,7 @@ ln -s "$repo_path" "$cli_core_path/$core_version"
 # Handle path_config for build script
 # Call the script once to create it
 if [ ! -f "$json_path" ]; then
-  python "$core_build_path/$builder_name" -l > /dev/null 2>&1
+  python "$core_build_path/$builder_name" -l >/dev/null 2>&1
 fi
 
 # Parameters

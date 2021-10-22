@@ -95,7 +95,7 @@ installCli() {
     echo "[$me] Could not retrieve arduino-cli. Abort."
     exit "$ret"
   fi
-  if ! command -v $cli > /dev/null 2>&1; then
+  if ! command -v $cli >/dev/null 2>&1; then
     echo "[$me] $cli not found."
     echo "Please ensure that $bin_path is in your PATH environment:"
     echo "Aborting!"
@@ -125,7 +125,7 @@ installIDE() {
   mkdir -p "$IDE_version_path"
 
   if [ ! -f "$IDE_archive" ]; then
-    wget "$IDE_url" > /dev/null 2>&1
+    wget "$IDE_url" >/dev/null 2>&1
     ret=$?
     if [ "$ret" -ne 0 ]; then
       echo "[$me] Could not download $IDE_name."
@@ -177,7 +177,7 @@ installLib() {
     return
   fi
 
-  readarray -t lib_list < "$libListFile"
+  readarray -t lib_list <"$libListFile"
 
   if [ ${#lib_list[@]} -eq 0 ]; then
     echo "No library to install"
@@ -189,14 +189,14 @@ installLib() {
 
   for lib_name in "${lib_list[@]}"; do
     if [[ "$lib_name" == *"http"* ]]; then
-      lib_url="$(cut -d' ' -f2 <<< "$lib_name")"
-      lib_name="$(cut -d' ' -f1 <<< "$lib_name")"
+      lib_url="$(cut -d' ' -f2 <<<"$lib_name")"
+      lib_name="$(cut -d' ' -f1 <<<"$lib_name")"
       lib_archive=$(basename "$lib_url")
 
       if [ -f "$lib_archive" ]; then
         rm "$lib_archive"
       fi
-      wget "$lib_url" > /dev/null 2>&1
+      wget "$lib_url" >/dev/null 2>&1
       ret=$?
       if [ "$ret" -ne 0 ]; then
         echo "Could not download $lib_name."
@@ -233,7 +233,7 @@ installLib() {
 updateCore() {
   echo "Install/update the STM32 core.."
   arduino-cli core update-index
-  if ! arduino-cli core list | grep "stm32" > /dev/null 2>&1; then
+  if ! arduino-cli core list | grep "stm32" >/dev/null 2>&1; then
     arduino-cli core install STMicroelectronics:stm32
   else
     arduino-cli core upgrade
@@ -244,16 +244,16 @@ updateCore() {
 updateSTM32Lib() {
   # Get list of repo
   if [ ! -f "$excludeListFile" ]; then
-    curl -s "$gh_repo" | jq '.[]|.html_url' | sed -e "s/\"//g" > "$repoListFile"
+    curl -s "$gh_repo" | jq '.[]|.html_url' | sed -e "s/\"//g" >"$repoListFile"
   else
-    curl -s "$gh_repo" | jq '.[]|.html_url' | grep -v -f "$excludeListFile" | sed -e "s/\"//g" > "$repoListFile"
+    curl -s "$gh_repo" | jq '.[]|.html_url' | grep -v -f "$excludeListFile" | sed -e "s/\"//g" >"$repoListFile"
   fi
   ret="${PIPESTATUS[0]}"
   if [ "$ret" -ne 0 ]; then
     echo "[$0] Could not retrieve STM32duino repository list. Abort."
     exit "$ret"
   fi
-  readarray -t git_list < "$repoListFile"
+  readarray -t git_list <"$repoListFile"
 
   if [ ${#git_list[@]} -eq 0 ]; then
     echo "[$0] No library found. Abort."
