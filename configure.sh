@@ -39,7 +39,7 @@ gh_stm32="https://github.com/stm32duino/BoardManagerFiles/raw/dev/package_stmicr
 cli="arduino-cli"
 cli_path="$bin_path/$cli"
 
-IDE_version="1.8.13"
+IDE_version="1.8.16"
 IDE_name="arduino-$IDE_version"
 IDE_path="$HOME/IDE"
 IDE_version_path="$IDE_path/$IDE_name"
