@@ -282,15 +282,15 @@ updateSTM32Lib() {
     if [ -d "$git_dir" ] && [ ! -d "$git_dir/.git" ]; then
       rm -fr "${git_dir:?}"
     fi
-    # Check branch name master or main
-    bname=$(git -C "$git_dir" branch -r | grep -v "\->" | awk -F"/" '{print $2}')
-    if [ -z "$bname" ]; then
-      echo "Could not find branch name for $git_name"
-      continue
-    fi
     if [ -d "$git_dir/.git" ]; then
+      # Check branch name master or main
+      bname=$(git -C "$git_dir" branch -r | grep -v "\->" | awk -F"/" '{print $2}')
+      if [ -z "$bname" ]; then
+        echo "Could not find branch name for $git_name"
+        continue
+      fi
       rname=$(git -C "$git_dir" remote -v | grep stm32duino | awk '{print $1}' | sort -u)
-      if [ ! -z "$rname" ]; then
+      if [ -n "$rname" ]; then
         echo "Updating remote $rname of $git_name..."
         # Check if the repository is cleaned
         # First is there any uncommited change(s) or untracked file(s)?
